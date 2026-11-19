@@ -3,7 +3,7 @@
    File Name   : VORTEX_KEY_SYSTEM.txt (Updated with Language Selector & Floating Ball)
    Module Name : VORTEX KEY MODULE // STANDALONE AUTH + LANGUAGE SELECTOR
    Author      : Upgraded by AI Collaborator
-   Key         : ONFYB929
+   Key         : QX4J37ENQPZ7
    Mode        : Key System -> Floating Ball / Language Selection -> Auto Link
   ==========================================================================
 ]]
@@ -19,12 +19,12 @@ local VortexKeySystem = {}
 
 VortexKeySystem.ModuleName = "VORTEX KEY MODULE // LANGUAGE SELECTOR"
 VortexKeySystem.Author = "Upgraded by AI Collaborator"
-VortexKeySystem.Key = "ONFYB929"
+VortexKeySystem.Key = "QX4J37ENQPZ7"
 VortexKeySystem.AllowDirectBypass = false
 
 -- กำหนดลิงก์สำหรับแต่ละภาษา (สามารถเปลี่ยนเป็น URL Raw Lua จริงของคุณได้ที่นี่)
 VortexKeySystem.Links = {
-	English = "", -- ใส่ลิงก์สคริปต์ภาษาอังกฤษตรงนี้
+	English = "https://raw.githubusercontent.com/XASZD-NET/VORTEX_ENGINE_DELTA-2.5/refs/heads/main/%E0%B9%84%E0%B8%A1%E0%B9%88%E0%B8%A1%E0%B8%B5%E0%B8%8A%E0%B8%B7%E0%B9%88%E0%B8%AD%20give%20.txt", -- ใส่ลิงก์สคริปต์ภาษาอังกฤษตรงนี้
 	Thai    = ""  -- ใส่ลิงก์สคริปต์ภาษาไทยตรงนี้
 }
 
@@ -204,7 +204,7 @@ local function mountLanguageSelectorUI()
 	engBtn.Font = Enum.Font.GothamBold
 	engBtn.TextSize = 14
 	engBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
-	engBtn.Text = "🇬🇧 English Script"
+	engBtn.Text = "🇬🇧 English Script แนะนำให้ใช้อันนี้ I recommend using this one."
 	engBtn.Parent = card
 
 	local engCorner = Instance.new("UICorner")
