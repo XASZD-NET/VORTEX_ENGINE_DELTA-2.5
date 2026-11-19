@@ -227,7 +227,7 @@ local function mountLanguageSelectorUI()
 	thaiBtn.Text = "🇹🇭 ภาษาไทย (Thai Script)"
 	thaiBtn.Parent = card
 
-		-- ปุ่ม2ภาษา (TH/EN)
+		-- ปุ่ม2ภาษา (["TH,EN"])
 	local thaiBtn = Instance.new("TextButton")
 	thaiBtn.Name = "ThaiBtn"
 	thaiBtn.Size = UDim2.new(1, -24, 0, 45)
@@ -238,7 +238,7 @@ local function mountLanguageSelectorUI()
 	thaiBtn.Font = Enum.Font.GothamBold
 	thaiBtn.TextSize = 14
 	thaiBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
-	thaiBtn.Text = "🇹🇭🇬🇧 ภาษาไทยและอังกฤษ(HN/EN)"
+	thaiBtn.Text = "🇹🇭🇬🇧 ภาษาไทยและอังกฤษ(["TH,EN"])"
 	thaiBtn.Parent = card
 
 	local thaiCorner = Instance.new("UICorner")
@@ -286,12 +286,11 @@ local function mountLanguageSelectorUI()
 		screenGui:Destroy()
 		VortexKeySystem.RunSelectedScript("Thai")
 	end)
-end
 
 	-- กดเลือก2 ภาษา
-	thaiBtn.MouseButton1Click:Connect(function()
+	thai engBtn.MouseButton1Click:Connect(function()
 		screenGui:Destroy()
-		VortexKeySystem.RunSelectedScript("TH/EN")
+		VortexKeySystem.RunSelectedScript(["TH,EN"])
 	end)
 end
 
