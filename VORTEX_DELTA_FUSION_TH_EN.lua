@@ -1,769 +1,625 @@
---[[
-  ==========================================================================
-   ชื่อไฟล์      : VORTEX_DELTA_FUSION_TH_EN.lua
-   ชื่อสคริปต์    : VORTEX KEY + DELTA ENGINE + MOBILE CONFIG + TH/EN UI (FUSION)
-   รหัสคีย์      : QX4J37ENQPZ7
-  ==========================================================================
-]]
+local _version = "1.6.66"
+local WindUI = loadstring(game:HttpGet("https://github.com/Footagesus/WindUI/releases/download/" .. _version .. "/main.lua"))()
 
---// 1. Services & Core References
-local Players           = game:GetService("Players")
-local RunService        = game:GetService("RunService")
+-- ธีมสีแดง (Red Theme)
+WindUI:AddTheme({
+    Name = "Red",
+    Accent = Color3.fromHex("#991b1b"),
+    Background = Color3.fromHex("#180909"),
+    Outline = Color3.fromHex("#ef4444"),
+    Text = Color3.fromHex("#fff5f5"),
+    Placeholder = Color3.fromHex("#fca5a5"),
+    Button = Color3.fromHex("#b91c1c"),
+    Icon = Color3.fromHex("#f87171"),
+})
+
+-- ==========================================
+-- [1] โค้ดฐานหลัก (Core Engine & Services)
+-- ==========================================
+local Players = game:GetService("Players")
+local RunService = game:GetService("RunService")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
-local UserInputService  = game:GetService("UserInputService")
-local VirtualUser       = game:GetService("VirtualUser")
-local Workspace         = game:GetService("Workspace")
-local CoreGui           = game:GetService("CoreGui")
-
+local UserInputService = game:GetService("UserInputService")
+local Lighting = game:GetService("Lighting")
+local Stats = game:GetService("Stats")
 local LocalPlayer = Players.LocalPlayer
 
---// 2. Key System & Multi-Language (TH / EN)
-local FALLBACK_KEY_REF = "QX4J37ENQPZ7"
-
-local Strings = {
-	TH = {
-		keyTitle       = "ระบบตรวจสอบคีย์ VORTEX",
-		keyHint        = "กรอกคีย์เพื่อเข้าสู่ระบบ (ลากหรือกดลูกบอล VX เพื่อซ่อน/แสดง)",
-		keyPlaceholder = "ใส่คีย์ที่นี่...",
-		keySubmit      = "ยืนยันคีย์",
-		keyHintCode    = "รหัสคีย์: %s",
-		keySuccess     = "เช็คคีย์สำเร็จ! กำลังเปิดหน้าเลือกภาษา...",
-		keyFail        = "คีย์ไม่ถูกต้อง กรุณาลองใหม่อีกครั้ง",
-		keySuccessBtn  = "สำเร็จ",
-		langTitle      = "เลือกภาษา / SELECT LANGUAGE",
-		langDesc       = "เลือกภาษาสำหรับระบบ VORTEX DELTA",
-		langTH         = "ภาษาไทย (Thai)",
-		langEN         = "English",
-		loadTitle      = "ระบบ VORTEX DELTA // กำลังโหลดระบบทั้งหมด",
-		loadDetail     = "กำลังโหลดข้อมูลและรูปแบบการทำงานทั้งหมด...",
-		loadDone       = "โหลดข้อมูลและรูปแบบการทำงานทั้งหมดเสร็จสมบูรณ์",
-		ctrlTitle      = "เมนูควบคุม VORTEX DELTA",
-		ctrlSub        = "ลากลูกบอล VX เพื่อย้าย | กดเพื่อเปิด-ปิดหน้าต่าง",
-		autoOn         = "ทำงานอัตโนมัติ (AutoCycle): เปิด",
-		autoOff        = "ทำงานอัตโนมัติ (AutoCycle): ปิด",
-		mobileBtn      = "ตั้งค่าโหมดมือถือ (Mobile Offline Config)",
-		mobileDone     = "ใช้ค่าตั้งค่ามือถือแล้ว! (SpeedCap=2, AutoCycle=ON)",
-		switchLangBtn  = "สลับภาษา TH / EN",
-		hideBtn        = "ซ่อนหน้าต่าง (กดลูกบอล VX เพื่อเปิดใหม่)",
-		initText       = "เริ่มต้นระบบเรียบร้อย",
-	},
-	EN = {
-		keyTitle       = "VORTEX KEY SYSTEM",
-		keyHint        = "Enter key to unlock (drag or tap VX ball to hide/show)",
-		keyPlaceholder = "Enter key here...",
-		keySubmit      = "Verify Key",
-		keyHintCode    = "Key: %s",
-		keySuccess     = "Key verified! Opening language menu...",
-		keyFail        = "Invalid key. Please try again.",
-		keySuccessBtn  = "Success",
-		langTitle      = "SELECT LANGUAGE / เลือกภาษา",
-		langDesc       = "Choose language for VORTEX DELTA system",
-		langTH         = "ภาษาไทย (Thai)",
-		langEN         = "English",
-		loadTitle      = "VORTEX DELTA // LOADING ALL SYSTEMS",
-		loadDetail     = "Loading all data and runtime modules...",
-		loadDone       = "All systems loaded successfully",
-		ctrlTitle      = "VORTEX DELTA CONTROL MENU",
-		ctrlSub        = "Drag VX ball to move | Tap to toggle window",
-		autoOn         = "AutoCycle: ON",
-		autoOff        = "AutoCycle: OFF",
-		mobileBtn      = "Apply Mobile Offline Config",
-		mobileDone     = "Mobile Config Applied! (SpeedCap=2, AutoCycle=ON)",
-		switchLangBtn  = "Switch Language TH / EN",
-		hideBtn        = "Hide Window (Tap VX ball to reopen)",
-		initText       = "Initialized successfully",
-	},
+local ConfigData = {
+    SpeedCap = 1.15,
+    HopRatio = 1.515,
+    HopMin = 40,
+    HopGap = 0.06,
+    HopGapMin = 0.06,
+    HopGapMax = 0.2,
+    HopRetries = 6,
+    HopLift = 42,
+    LandOffset = 14,
+    LandSettle = 0.08,
+    DropDelay = 0.05,
+    GrabInterval = 0.03,
+    RegrabFar = 40,
+    Height = 70,
+    ClimbShare = 0.5,
+    CarryRatio = 0.9,
+    EasyRatio = 1.3
 }
-
-local CurrentLang = (getgenv and getgenv().VORTEX_LANG == "EN") and "EN" or "TH"
-
-local function T(key, ...)
-	local pack = Strings[CurrentLang] or Strings.TH
-	local str = pack[key] or Strings.TH[key] or key
-	if select("#", ...) > 0 then
-		local ok, formatted = pcall(string.format, str, ...)
-		if ok then
-			return formatted
-		end
-	end
-	return str
-end
-
-local function setLang(lang)
-	CurrentLang = (lang == "EN") and "EN" or "TH"
-	if getgenv then
-		getgenv().VORTEX_LANG = CurrentLang
-	end
-end
-
-local VortexKeySystem = {
-	ModuleName = "VORTEX KEY MODULE // FUSION AUTH",
-	Author = "Upgraded Fusion Build",
-	Key = FALLBACK_KEY_REF,
-	AllowDirectBypass = false,
-	AutoRunEnabled = true,
-	AutoRunUrl = "",
-	AutoRunCallback = nil,
-}
-
-local _hasAutoExecuted = false
-
-local function normalizeKey(input)
-	if type(input) ~= "string" then
-		return ""
-	end
-	return string.match(input, "^%s*(.-)%s*$") or ""
-end
-
-function VortexKeySystem.GetExpectedKey()
-	return VortexKeySystem.Key
-end
-
-function VortexKeySystem.SetAutoRunLink(url, autoRun)
-	if type(url) == "string" then
-		VortexKeySystem.AutoRunUrl = normalizeKey(url)
-	end
-	if autoRun ~= nil then
-		VortexKeySystem.AutoRunEnabled = autoRun and true or false
-	end
-end
-
-function VortexKeySystem.SetAutoRunCallback(fn)
-	if type(fn) == "function" then
-		VortexKeySystem.AutoRunCallback = fn
-	end
-end
-
-function VortexKeySystem.Validate(candidate)
-	local supplied = candidate
-	if supplied == nil then
-		supplied = rawget(_G, "VORTEX_KEY") or rawget(_G, "SCRIPT_KEY") or (getgenv and getgenv().VORTEX_KEY)
-	end
-	return normalizeKey(tostring(supplied or "")) == VortexKeySystem.Key
-end
-
-function VortexKeySystem.RunLinkedScript(force)
-	if _hasAutoExecuted and not force then
-		return true
-	end
-	if not VortexKeySystem.AutoRunEnabled and not force then
-		return false
-	end
-	_hasAutoExecuted = true
-
-	if type(VortexKeySystem.AutoRunCallback) == "function" then
-		local ok, err = pcall(VortexKeySystem.AutoRunCallback)
-		if not ok then
-			warn("[VORTEX KEY] Auto callback error: " .. tostring(err))
-			return false
-		end
-		return true
-	end
-
-	local targetUrl = normalizeKey(VortexKeySystem.AutoRunUrl)
-	if targetUrl == "" then
-		return true
-	end
-	if typeof(game.HttpGet) ~= "function" or typeof(loadstring) ~= "function" then
-		return false
-	end
-
-	task.spawn(function()
-		local okFetch, body = pcall(function()
-			return game:HttpGet(targetUrl)
-		end)
-		if not okFetch or type(body) ~= "string" or body == "" then
-			return
-		end
-		local fn = loadstring(body)
-		if fn then
-			pcall(fn)
-		end
-	end)
-	return true
-end
-
-function VortexKeySystem.Authorize(candidate)
-	if VortexKeySystem.Validate(candidate) then
-		if getgenv then
-			getgenv().VORTEX_AUTH_VERIFIED = true
-			getgenv().VORTEX_AUTH_KEY = VortexKeySystem.Key
-			getgenv().VORTEX_KEY = VortexKeySystem.Key
-		end
-		VortexKeySystem.RunLinkedScript(false)
-		return true
-	end
-	if getgenv then
-		getgenv().VORTEX_AUTH_VERIFIED = false
-	end
-	return false
-end
-
-function VortexKeySystem.Revoke()
-	_hasAutoExecuted = false
-	if getgenv then
-		getgenv().VORTEX_AUTH_VERIFIED = false
-		getgenv().VORTEX_AUTH_KEY = nil
-	end
-end
-
-function VortexKeySystem.IsAuthorized()
-	if VortexKeySystem.AllowDirectBypass then
-		return true
-	end
-	if getgenv and getgenv().VORTEX_AUTH_VERIFIED == true and getgenv().VORTEX_AUTH_KEY == VortexKeySystem.Key then
-		return true
-	end
-	return VortexKeySystem.Validate()
-end
-
-if getgenv then
-	getgenv().VortexKeySystem = VortexKeySystem
-end
-
---// 3. Config, State & RigSync
-local Config = {
-	RequireExternalKey = true,
-	AllowLocalFallback = true,
-
-	FullScreenSpringLoader = true,
-	SpringStiffness = 175,
-	SpringDamping = 22,
-	MinLoaderDuration = 0.75,
-
-	SpeedCap = 1.20,
-	HopRatio = 1.515,
-	HopMin = 40,
-	HopGap = 0.06,
-	HopGapMin = 0.06,
-	HopGapMax = 0.20,
-	HopRetries = 6,
-	HopLift = 42,
-	LandOffset = 14,
-	LandSettle = 0.08,
-	DropDelay = 0.05,
-	GrabInterval = 0.03,
-	RegrabFar = 40,
-	Height = 70,
-	ClimbShare = 0.5,
-	CarryRatio = 0.9,
-	EasyRatio = 1.3,
-	ArriveRadius = 2.5,
-	SafeZoneRadius = 20,
-	StuckTimeout = 1.5,
-	StuckThreshold = 3.0,
-
-	AutoCycle = false,
-	CycleInterval = 0.35,
-
-	AutoRegrab = true,
-	SmartAvoid = true,
-	AntiAFK = true,
-	RigSyncEnabled = true,
-	StuckRecovery = true,
-	DebugLog = true,
-	FpsPulse = { 60, 30, 0.15 },
-	TargetFps = 240,
-}
-
-local State = {
-	Authorized = false,
-	LoadedAll = false,
-	LoadProgress = 0,
-	Carrying = false,
-	Uid = nil,
-	Delivered = 0,
-	DeliveredCount = 0,
-	RegrabCount = 0,
-	RecoveryCount = 0,
-	Busy = false,
-	Cancel = false,
-	Mult = 1,
-	PulledAt = 0,
-	HeldSeen = 0,
-	GuessedDrop = false,
-	LastAction = T("initText"),
-	StartTime = os.clock(),
-	History = {},
-}
-
-local RigSync = {
-	Original = nil,
-	Clone = nil,
-	VisualClone = nil,
-	Links = {},
-	Connection = nil,
-	Added = nil,
-}
-
-local function logInfo(msg, isWarn)
-	if not Config.DebugLog and not isWarn then
-		return
-	end
-	local prefix = "[VORTEX DELTA] "
-	if isWarn then
-		warn(prefix .. tostring(msg))
-	else
-		print(prefix .. tostring(msg))
-	end
-end
-
-local function recordEvent(kind, detail)
-	State.LastAction = string.format("%s: %s", tostring(kind), tostring(detail or ""))
-	State.History[#State.History + 1] = {
-		Time = os.clock(),
-		Kind = kind,
-		Detail = detail,
-	}
-	if #State.History > 100 then
-		table.remove(State.History, 1)
-	end
-end
-
-local function applyMobileOfflineConfig()
-	Config.AutoCycle = true
-	Config.AutoRegrab = true
-	Config.SmartAvoid = true
-	Config.AntiAFK = true
-	Config.RigSyncEnabled = true
-	Config.StuckRecovery = true
-	Config.SpeedCap = 2
-	Config.HopRatio = 2.19
-	Config.HopMin = 80
-	Config.HopLift = 75
-	Config.CarryRatio = 1.3
-	Config.CycleInterval = 2
-	recordEvent("MobileConfig", "Applied")
-end
-
---// 4. Safe Module & Instance Helpers
-local function getGuiParent()
-	local ok, gui = pcall(function()
-		return CoreGui
-	end)
-	if ok and gui then
-		return gui
-	end
-	return LocalPlayer and LocalPlayer:WaitForChild("PlayerGui")
-end
+local FpsCycle = { 60, 30, 0.15 }
 
 local function safeRequire(getter)
-	local ok, res = pcall(function()
-		local target = getter()
-		return target and require(target) or nil
-	end)
-	return ok and res or nil
+    local ok, mod = pcall(function()
+        return require(getter())
+    end)
+    return (ok and mod) or nil
 end
 
-local function getNetworkingFolder()
-	local pkg = ReplicatedStorage:FindFirstChild("Packages")
-	return pkg and pkg:FindFirstChild("Networking") or nil
+-- โหลดโมดูลเฉพาะแมพแบบปลอดภัย (ไม่ Error ในแมพอื่น)
+local Packages = ReplicatedStorage:FindFirstChild("Packages")
+local Networking = Packages and Packages:FindFirstChild("Networking")
+local EggState = safeRequire(function() return ReplicatedStorage.Client.EggState end)
+local AssetsData = safeRequire(function() return ReplicatedStorage.Data.Assets end)
+local MutationsMod = safeRequire(function() return ReplicatedStorage.Shared.Modules.Mutations end)
+
+local function getNet(name)
+    return Networking and Networking:FindFirstChild(name)
 end
 
-local EggState = safeRequire(function()
-	local c = ReplicatedStorage:FindFirstChild("Client")
-	return c and c:FindFirstChild("EggState")
-end)
-
-local AssetsData = safeRequire(function()
-	local d = ReplicatedStorage:FindFirstChild("Data")
-	return d and d:FindFirstChild("Assets")
-end)
-
-local MutationsMod = safeRequire(function()
-	local s = ReplicatedStorage:FindFirstChild("Shared")
-	local m = s and s:FindFirstChild("Modules")
-	return m and m:FindFirstChild("Mutations")
-end)
-
-local function getRemote(name)
-	local net = getNetworkingFolder()
-	return net and net:FindFirstChild(name) or nil
+local function getHRP()
+    local char = LocalPlayer.Character
+    return char and char:FindFirstChild("HumanoidRootPart")
 end
 
-local function getCharacter()
-	return LocalPlayer.Character
+-- ระบบ Clone Humanoid กันรีเซ็ต WalkSpeed (v15 - v25)
+local HumState = { Original = nil, Clone = nil, Links = {}, Connection = nil, Added = nil }
+
+local function getBaseSpeed()
+    local char = LocalPlayer.Character
+    local hum = char and char:FindFirstChildOfClass("Humanoid")
+    local spd = (hum and hum.WalkSpeed) or 16
+    if HumState.Original and HumState.Original.Health > 0 then
+        spd = math.min(spd, HumState.Original.WalkSpeed)
+    end
+    local ok, customSpd = pcall(function()
+        local ls = LocalPlayer:FindFirstChild("leaderstats")
+        local spObj = ls and ls:FindFirstChild("Speed")
+        local util = require(ReplicatedStorage.Shared.Util.TreadmillUtil)
+        return (spObj and util.SpeedPowerToWalkSpeed(spObj.Value)) or nil
+    end)
+    if ok and type(customSpd) == "number" and customSpd > 0 then
+        spd = math.min(spd, customSpd)
+    end
+    return spd
 end
 
-local function getHumanoid(char)
-	local c = char or getCharacter()
-	return c and c:FindFirstChildOfClass("Humanoid")
+local function bindControls(hum)
+    pcall(function()
+        local ps = LocalPlayer:FindFirstChild("PlayerScripts")
+        local pm = ps and ps:FindFirstChild("PlayerModule")
+        if pm then
+            local controls = require(pm):GetControls()
+            if type(controls) == "table" then
+                controls.humanoid = hum
+            end
+        end
+    end)
 end
 
-local function getHRP(char)
-	local c = char or getCharacter()
-	return c and c:FindFirstChild("HumanoidRootPart")
+local function resetAnimate(char)
+    local anim = char and char:FindFirstChild("Animate")
+    if anim and anim:IsA("LocalScript") then
+        task.spawn(function()
+            anim.Enabled = false
+            task.wait()
+            anim.Enabled = true
+        end)
+    end
 end
 
---// 5. Speed, RigSync, Decoy, Camera & FPS
-local function getBaseWalkSpeed()
-	local hum = getHumanoid()
-	local speed = (hum and hum.WalkSpeed) or 16
-
-	if RigSync.Original and RigSync.Original.Health > 0 then
-		speed = math.min(speed, RigSync.Original.WalkSpeed)
-	end
-
-	local ok, treadSpeed = pcall(function()
-		local stats = LocalPlayer:FindFirstChild("leaderstats")
-		local speedStat = stats and stats:FindFirstChild("Speed")
-		local sharedFolder = ReplicatedStorage:FindFirstChild("Shared")
-		local utilFolder = sharedFolder and sharedFolder:FindFirstChild("Util")
-		local treadMod = utilFolder and utilFolder:FindFirstChild("TreadmillUtil")
-		if speedStat and treadMod then
-			local treadUtil = require(treadMod)
-			if type(treadUtil) == "table" and type(treadUtil.SpeedPowerToWalkSpeed) == "function" then
-				return treadUtil.SpeedPowerToWalkSpeed(speedStat.Value)
-			end
-		end
-		return nil
-	end)
-
-	if ok and type(treadSpeed) == "number" and treadSpeed > 0 then
-		speed = math.min(speed, treadSpeed)
-	end
-
-	return math.max(speed, 1)
-end
-
-local function syncPlayerControls(hum)
-	pcall(function()
-		local playerScripts = LocalPlayer:FindFirstChild("PlayerScripts")
-		local playerModule = playerScripts and playerScripts:FindFirstChild("PlayerModule")
-		if playerModule then
-			local controls = require(playerModule):GetControls()
-			if type(controls) == "table" then
-				controls.humanoid = hum
-			end
-		end
-	end)
-end
-
-local function refreshAnimateScript(char)
-	local anim = char and char:FindFirstChild("Animate")
-	if anim and anim:IsA("LocalScript") then
-		task.spawn(function()
-			anim.Enabled = false
-			task.wait()
-			if anim and anim.Parent then
-				anim.Enabled = true
-			end
-		end)
-	end
-end
-
-local function clearRigLinks()
-	for _, conn in ipairs(RigSync.Links) do
-		pcall(function()
-			conn:Disconnect()
-		end)
-	end
-	table.clear(RigSync.Links)
+local function clearHumLinks()
+    for _, conn in ipairs(HumState.Links) do
+        pcall(function() conn:Disconnect() end)
+    end
+    table.clear(HumState.Links)
 end
 
 local GroundedStates = {
-	[Enum.HumanoidStateType.Running] = true,
-	[Enum.HumanoidStateType.RunningNoPhysics] = true,
-	[Enum.HumanoidStateType.Landed] = true,
+    [Enum.HumanoidStateType.Running] = true,
+    [Enum.HumanoidStateType.RunningNoPhysics] = true,
+    [Enum.HumanoidStateType.Landed] = true
 }
 
 local function isGrounded(hum)
-	if not hum or hum.Health <= 0 or hum.FloorMaterial == Enum.Material.Air then
-		return false
-	end
-	return GroundedStates[hum:GetState()] == true
+    if not hum or hum.Health <= 0 or hum.FloorMaterial == Enum.Material.Air then
+        return false
+    end
+    return GroundedStates[hum:GetState()] == true
 end
 
-local function applyHumanoidCloneSync()
-	if not Config.RigSyncEnabled then
-		return
-	end
-	local char = getCharacter()
-	local hum = getHumanoid(char)
-	if not hum or hum.Health <= 0 then
-		return
-	end
-	if RigSync.Clone and RigSync.Clone.Parent == char then
-		return
-	end
-	if not isGrounded(hum) then
-		return
-	end
+local function cloneHumanoid()
+    local char = LocalPlayer.Character
+    local hum = char and char:FindFirstChildOfClass("Humanoid")
+    if not hum or hum.Health <= 0 then return end
+    if HumState.Clone and HumState.Clone.Parent == char then return end
+    if not isGrounded(hum) then return end
 
-	local cloned = hum:Clone()
-	hum.Parent = nil
-	cloned.Parent = char
+    local cloned = hum:Clone()
+    hum.Parent = nil
+    cloned.Parent = char
+    workspace.CurrentCamera.CameraSubject = cloned
+    bindControls(cloned)
+    resetAnimate(char)
 
-	if Workspace.CurrentCamera then
-		Workspace.CurrentCamera.CameraSubject = cloned
-	end
+    HumState.Original = hum
+    HumState.Clone = cloned
 
-	syncPlayerControls(cloned)
-	refreshAnimateScript(char)
+    table.insert(HumState.Links, hum:GetPropertyChangedSignal("WalkSpeed"):Connect(function()
+        if cloned.Parent ~= nil then
+            cloned.WalkSpeed = hum.WalkSpeed
+        end
+    end))
 
-	RigSync.Original = hum
-	RigSync.Clone = cloned
+    local origAnim = hum:FindFirstChildOfClass("Animator")
+    local cloneAnim = cloned:FindFirstChildOfClass("Animator")
+    if origAnim and cloneAnim then
+        table.insert(HumState.Links, origAnim.AnimationPlayed:Connect(function(track)
+            local animObj = track.Animation
+            if not animObj or cloned.Parent == nil then return end
+            local ok, loaded = pcall(function() return cloneAnim:LoadAnimation(animObj) end)
+            if not ok or not loaded then return end
+            pcall(function()
+                loaded.Priority = track.Priority
+                loaded.Looped = track.Looped
+                loaded:Play(0.05, math.max(track.WeightTarget, 0.01), track.Speed)
+            end)
+            local stopConn
+            stopConn = track.Stopped:Connect(function()
+                stopConn:Disconnect()
+                pcall(function() loaded:Stop(0.1) end)
+            end)
+        end))
+    end
 
-	table.insert(RigSync.Links, hum:GetPropertyChangedSignal("WalkSpeed"):Connect(function()
-		if cloned.Parent ~= nil then
-			cloned.WalkSpeed = hum.WalkSpeed
-		end
-	end))
-
-	local origAnim = hum:FindFirstChildOfClass("Animator")
-	local cloneAnim = cloned:FindFirstChildOfClass("Animator")
-	if origAnim and cloneAnim then
-		table.insert(RigSync.Links, origAnim.AnimationPlayed:Connect(function(track)
-			local animObj = track.Animation
-			if not animObj or cloned.Parent == nil then
-				return
-			end
-			local ok, loaded = pcall(function()
-				return cloneAnim:LoadAnimation(animObj)
-			end)
-			if not ok or not loaded then
-				return
-			end
-			pcall(function()
-				loaded.Priority = track.Priority
-				loaded.Looped = track.Looped
-				loaded:Play(0.05, math.max(track.WeightTarget or 0.01, 0.01), track.Speed or 1)
-			end)
-			local stopConn
-			stopConn = track.Stopped:Connect(function()
-				if stopConn then
-					stopConn:Disconnect()
-				end
-				pcall(function()
-					loaded:Stop(0.1)
-				end)
-			end)
-		end))
-	end
-
-	table.insert(RigSync.Links, cloned.Died:Connect(function()
-		clearRigLinks()
-		RigSync.Original, RigSync.Clone = nil, nil
-		local currentChar = getCharacter()
-		if currentChar and hum.Parent == nil then
-			hum.Parent = currentChar
-			if Workspace.CurrentCamera then
-				Workspace.CurrentCamera.CameraSubject = hum
-			end
-			syncPlayerControls(hum)
-		end
-		pcall(function()
-			cloned:Destroy()
-		end)
-		hum.Health = 0
-	end))
+    table.insert(HumState.Links, cloned.Died:Connect(function()
+        clearHumLinks()
+        HumState.Original, HumState.Clone = nil, nil
+        local c = LocalPlayer.Character
+        if c and hum.Parent == nil then
+            hum.Parent = c
+            workspace.CurrentCamera.CameraSubject = hum
+            bindControls(hum)
+        end
+        pcall(function() cloned:Destroy() end)
+        hum.Health = 0
+    end))
 end
 
-local function restoreOriginalHumanoid()
-	clearRigLinks()
-	local char = getCharacter()
-	local orig, cloned = RigSync.Original, RigSync.Clone
-	RigSync.Original, RigSync.Clone = nil, nil
-	if orig and cloned and char and orig.Parent == nil and cloned.Parent == char then
-		orig.Parent = char
-		if Workspace.CurrentCamera then
-			Workspace.CurrentCamera.CameraSubject = orig
-		end
-		syncPlayerControls(orig)
-		pcall(function()
-			cloned:Destroy()
-		end)
-		refreshAnimateScript(char)
-	end
+local function restoreHumanoid()
+    clearHumLinks()
+    local char = LocalPlayer.Character
+    local orig, cloned = HumState.Original, HumState.Clone
+    HumState.Original, HumState.Clone = nil, nil
+    if orig and cloned and char and orig.Parent == nil and cloned.Parent == char then
+        orig.Parent = char
+        workspace.CurrentCamera.CameraSubject = orig
+        bindControls(orig)
+        pcall(function() cloned:Destroy() end)
+        resetAnimate(char)
+    end
 end
 
-local function startRigSyncLoop()
-	if RigSync.Connection then
-		return
-	end
-	applyHumanoidCloneSync()
-	local acc = 0
-	RigSync.Connection = RunService.Heartbeat:Connect(function(dt)
-		acc += dt
-		local char = getCharacter()
-		local missing = not (RigSync.Clone and char and RigSync.Clone.Parent == char)
-		local interval = missing and 0.25 or 3
-		if acc >= interval then
-			acc = 0
-			applyHumanoidCloneSync()
-		end
-	end)
-
-	RigSync.Added = LocalPlayer.CharacterAdded:Connect(function(newChar)
-		clearRigLinks()
-		RigSync.Original, RigSync.Clone = nil, nil
-		task.spawn(function()
-			newChar:WaitForChild("Humanoid", 10)
-			task.wait(1)
-			if RigSync.Connection and LocalPlayer.Character == newChar then
-				applyHumanoidCloneSync()
-			end
-		end)
-	end)
+local function enableHumBypass()
+    cloneHumanoid()
+    local elapsed = 0
+    HumState.Connection = RunService.Heartbeat:Connect(function(dt)
+        elapsed += dt
+        local char = LocalPlayer.Character
+        local missing = not (HumState.Clone and char and HumState.Clone.Parent == char)
+        if ((missing and 0.25) or 3) <= elapsed then
+            elapsed = 0
+            cloneHumanoid()
+        end
+    end)
+    HumState.Added = LocalPlayer.CharacterAdded:Connect(function(char)
+        clearHumLinks()
+        HumState.Original, HumState.Clone = nil, nil
+        task.spawn(function()
+            char:WaitForChild("Humanoid", 10)
+            task.wait(1)
+            if HumState.Connection and LocalPlayer.Character == char then
+                cloneHumanoid()
+            end
+        end)
+    end)
 end
 
-local function stopRigSyncLoop()
-	if RigSync.Connection then
-		RigSync.Connection:Disconnect()
-		RigSync.Connection = nil
-	end
-	if RigSync.Added then
-		RigSync.Added:Disconnect()
-		RigSync.Added = nil
-	end
-	restoreOriginalHumanoid()
+local function disableHumBypass()
+    if HumState.Connection then HumState.Connection:Disconnect(); HumState.Connection = nil end
+    if HumState.Added then HumState.Added:Disconnect(); HumState.Added = nil end
+    restoreHumanoid()
 end
 
-local function destroyVisualClone()
-	local decoy = RigSync.VisualClone
-	RigSync.VisualClone = nil
-	if decoy then
-		pcall(function()
-			decoy:Destroy()
-		end)
-	end
+-- ระบบ Egg & Auto Carry (v26 - v34)
+local CarryState = {
+    Carrying = false,
+    Uid = nil,
+    Delivered = 0,
+    Busy = false,
+    Cancel = false,
+    Mult = 1,
+    PulledAt = 0,
+    HeldSeen = 0,
+    GuessedDrop = false
+}
+
+if type(EggState) == "table" and type(EggState.CarryChanged) == "table" then
+    pcall(function()
+        EggState.CarryChanged:Connect(function(data)
+            local isCarry = type(data) == "table" and data.IsCarrying == true
+            if isCarry and data.GuardDisabled == true then
+                isCarry = false
+            end
+            CarryState.GuessedDrop = false
+            if isCarry then
+                CarryState.HeldSeen = os.clock()
+            end
+            if isCarry and type(data.Uid) == "string" then
+                CarryState.Uid = data.Uid
+                local mult = tonumber(data.SpeedMultiplier)
+                if mult and mult > 0 then
+                    CarryState.Mult = mult
+                end
+            end
+            CarryState.Carrying = isCarry
+        end)
+    end)
 end
 
-local function spawnVisualClone()
-	destroyVisualClone()
-	local char = getCharacter()
-	if not char then
-		return nil
-	end
-	local oldArch = char.Archivable
-	char.Archivable = true
-	local decoy = char:Clone()
-	char.Archivable = oldArch
-	if decoy then
-		for _, desc in ipairs(decoy:GetDescendants()) do
-			if desc:IsA("LuaSourceContainer") or desc:IsA("Humanoid") then
-				pcall(function()
-					desc:Destroy()
-				end)
-			elseif desc:IsA("BasePart") then
-				desc.Anchored = true
-				desc.CanCollide = false
-				desc.CanTouch = false
-				desc.CanQuery = false
-			end
-		end
-		decoy.Name = "VortexDecoyClone"
-		decoy.Parent = Workspace
-		RigSync.VisualClone = decoy
-	end
-	return decoy
+pcall(function()
+    local re = getNet("RE/EggWorld/FieldEggRedeemVerdict")
+    if re then re.OnClientEvent:Connect(function() CarryState.Delivered = os.clock() end) end
+end)
+
+pcall(function()
+    local re = getNet("RE/RigSync/Refresh")
+    if re then
+        re.OnClientEvent:Connect(function(data)
+            if type(data) == "table" and data.Action == "Relocate" then
+                CarryState.PulledAt = os.clock()
+            end
+        end)
+    end
+end)
+
+local function carryEgg(uid)
+    if type(uid) == "string" and type(EggState) == "table" and type(EggState.CarryFieldEgg) == "function" then
+        pcall(EggState.CarryFieldEgg, uid)
+    end
 end
 
-local function lockCameraTemporarily()
-	local cam = Workspace.CurrentCamera
-	if not cam then
-		return function() end
-	end
-	local prevType = cam.CameraType
-	local prevCF = cam.CFrame
-	pcall(function()
-		cam.CameraType = Enum.CameraType.Scriptable
-		cam.CFrame = prevCF
-	end)
-	return function()
-		pcall(function()
-			cam.CameraType = prevType
-		end)
-	end
+local function dropEgg()
+    if type(EggState) == "table" and type(EggState.DropFieldEgg) == "function" then
+        pcall(EggState.DropFieldEgg, "PlayerRequest")
+    end
 end
 
+local function findNearestPrompt(pos, maxDist)
+    local bestPrompt, bestDist = nil, maxDist
+    for _, obj in ipairs(workspace:GetChildren()) do
+        if obj.Name == "SmartPromptPart" and obj:IsA("BasePart") then
+            local prompt = obj:FindFirstChild("CarryAreaEgg")
+            if prompt and prompt:IsA("ProximityPrompt") then
+                local dist = (obj.Position - pos).Magnitude
+                if dist < bestDist then
+                    bestPrompt, bestDist = prompt, dist
+                end
+            end
+        end
+    end
+    return bestPrompt
+end
+
+local function getEggSnapshots()
+    local list = {}
+    local rf = getNet("RF/EggWorld/AskFieldEggSnapshot")
+    if not rf then return list end
+    local ok, res = pcall(function() return rf:InvokeServer() end)
+    local records = (ok and type(res) == "table" and res.Records) or nil
+    if type(records) ~= "table" then return list end
+    for _, rec in pairs(records) do
+        if type(rec) == "table" and type(rec.Uid) == "string" and (rec.State == "Slot" or rec.State == "Dropped") and typeof(rec.BottomCFrame) == "CFrame" then
+            list[#list + 1] = rec
+        end
+    end
+    return list
+end
+
+local function parseEggInfo(rec)
+    local dir = (type(AssetsData) == "table" and AssetsData.Directory) or nil
+    local item = (type(dir) == "table" and dir[tostring(rec.AssetCategory)]) or nil
+    local info = {
+        Uid = rec.Uid,
+        Category = tostring(rec.AssetCategory),
+        Name = tostring(rec.AssetCategory),
+        Value = 0
+    }
+    if type(item) == "table" then
+        info.Name = tostring(item.DisplayName or rec.AssetCategory)
+        local scale = tonumber(rec.AssetScale) or 1
+        local scaleMult = (scale > 5 and (((scale / 5) ^ 1.2) * 19.637875755794113)) or (scale ^ 1.85)
+        local mutMult = 1
+        if type(MutationsMod) == "table" and type(MutationsMod.EarningsFor) == "function" then
+            local ok, mVal = pcall(MutationsMod.EarningsFor, (type(rec.Mutations) == "table" and rec.Mutations) or {})
+            if ok and type(mVal) == "number" then
+                mutMult = mVal
+            end
+        end
+        info.Value = (tonumber(item.EarningRate) or 0) * scaleMult * mutMult
+    end
+    return info
+end
+
+local function formatRate(val)
+    local units = { { 1e12, "T" }, { 1e9, "B" }, { 1e6, "M" }, { 1e3, "K" } }
+    for _, u in ipairs(units) do
+        if val >= u[1] then
+            return string.format("$%.2f%s/s", val / u[1], u[2])
+        end
+    end
+    return string.format("$%d/s", math.floor(val + 0.5))
+end
+
+-- ระบบ FPS Toggle & Visual Clone (v37 - v42)
 local fpsToken = 0
-local function startFpsPulse()
-	if typeof(setfpscap) ~= "function" then
-		return
-	end
-	fpsToken += 1
-	local token = fpsToken
-	task.spawn(function()
-		local toggle = true
-		local started = os.clock()
-		while fpsToken == token and (os.clock() - started) < 60 do
-			local cap = toggle and Config.FpsPulse[1] or Config.FpsPulse[2]
-			pcall(setfpscap, cap)
-			toggle = not toggle
-			task.wait(Config.FpsPulse[3])
-		end
-	end)
+local function startFpsToggle()
+    if typeof(setfpscap) ~= "function" then return end
+    fpsToken += 1
+    local myToken = fpsToken
+    task.spawn(function()
+        local high = true
+        local start = os.clock()
+        while fpsToken == myToken and (os.clock() - start) < 60 do
+            pcall(setfpscap, (high and FpsCycle[1]) or FpsCycle[2])
+            high = not high
+            task.wait(FpsCycle[3])
+        end
+    end)
 end
 
-local function restoreFpsCap()
-	fpsToken += 1
-	if typeof(setfpscap) == "function" then
-		pcall(setfpscap, Config.TargetFps)
-	end
+local function stopFpsToggle()
+    fpsToken += 1
+    if typeof(setfpscap) == "function" then
+        pcall(setfpscap, 240)
+    end
 end
 
---// 6. Landmarks, Field Egg Snapshot, Ranking & Hazard Avoidance
-local function getSeparationLine()
-	local root = Workspace:FindFirstChild("World") or Workspace:FindFirstChild("__OBJECTS")
-	local areas = root and root:FindFirstChild("Areas")
-	local line = areas and areas:FindFirstChild("SeparationLine")
-	if line and line:IsA("BasePart") then
-		return line.Position.X, line.Position.Y
-	end
-	return 552.2, 67.67
+local decoyClone = nil
+local function clearDecoy()
+    if decoyClone then
+        pcall(function() decoyClone:Destroy() end)
+        decoyClone = nil
+    end
 end
 
-local function getSafeTransitionPoint()
-	local candidates = {
-		{ { "GearGiver_Slap", "Podium" }, Vector3.new(-16.415, 21.072, -6.106) },
-		{ { "World", "Machines", "RiftMachine", "Rift", "Meshes/VoidPortal_Cube.003" }, Vector3.new(-26.776, 1.75, 18.665) },
-		{ { "__OBJECTS", "Machines", "RiftMachine", "Rift", "Meshes/VoidPortal_Cube.003" }, Vector3.new(-26.776, 1.75, 18.665) },
-	}
-	for _, entry in ipairs(candidates) do
-		local cur = Workspace
-		for _, seg in ipairs(entry[1]) do
-			cur = cur and cur:FindFirstChild(seg) or nil
-		end
-		if cur and cur:IsA("BasePart") then
-			return cur.CFrame:PointToWorldSpace(entry[2])
-		end
-	end
-	return Vector3.new(528.7, 70.57, -364.11)
+local function spawnDecoy()
+    clearDecoy()
+    local char = LocalPlayer.Character
+    if not char then return end
+    local prevArch = char.Archivable
+    char.Archivable = true
+    local cloned = char:Clone()
+    char.Archivable = prevArch
+    if cloned then
+        for _, d in ipairs(cloned:GetDescendants()) do
+            if d:IsA("LuaSourceContainer") or d:IsA("Humanoid") then
+                pcall(function() d:Destroy() end)
+            elseif d:IsA("BasePart") then
+                d.Anchored = true
+                d.CanCollide = false
+                d.CanTouch = false
+                d.CanQuery = false
+            end
+        end
+        cloned.Name = "VortexClone"
+        cloned.Parent = workspace
+        decoyClone = cloned
+    end
 end
 
-local function getFieldEggSnapshot()
-	local recordsOut = {}
-	local ok, res = pcall(function()
-		local rf = getRemote("RF/EggWorld/AskFieldEggSnapshot")
-		return rf and rf:InvokeServer() or nil
-	end)
-	local raw = (ok and type(res) == "table" and res.Records) or nil
-	if type(raw) ~= "table" then
-		return recordsOut
-	end
-
-	for _, rec in pairs(raw) do
-		if type(rec) == "table"
-			and type(rec.Uid) == "string"
-			and (rec.State == "Slot" or rec.State == "Dropped")
-			and typeof(rec.BottomCFrame) == "CFrame" then
-			recordsOut[#recordsOut + 1] = rec
-		end
-	end
-	return recordsOut
+-- ระบบหลบสิ่งกีดขวาง & เคลื่อนที่อัตโนมัติ (v43 - v54)
+local function getSafeZonePos()
+    for _, entry in ipairs({
+        { { "GearGiver_Slap", "Podium" }, Vector3.new(-16.415, 21.072, -6.106) },
+        { { "World", "Machines", "RiftMachine", "Rift", "Meshes/VoidPortal_Cube.003" }, Vector3.new(-26.776, 1.75, 18.665) },
+        { { "__OBJECTS", "Machines", "RiftMachine", "Rift", "Meshes/VoidPortal_Cube.003" }, Vector3.new(-26.776, 1.75, 18.665) }
+    }) do
+        local obj = workspace
+        for _, childName in ipairs(entry[1]) do
+            obj = obj and obj:FindFirstChild(childName)
+        end
+        if obj and obj:IsA("BasePart") then
+            return obj.CFrame:PointToWorldSpace(entry[2])
+        end
+    end
+    return Vector3.new(528.7, 70.57, -364.11)
 end
 
-local function findEggPositionByUid(uid)
-	for _, rec in ipairs(getFieldEggSnapshot()) do
-		if rec.Uid == uid then
-			return rec.BottomCFrame.Position
-		end
-	end
-	return nil
+local function tpToPos(targetPos)
+    local hrp = getHRP()
+    if not hrp then return end
+    pcall(function()
+        hrp.CFrame = CFrame.new(targetPos) * CFrame.Angles(0, math.rad(90), 0)
+        hrp.AssemblyLinearVelocity = Vector3.zero
+        hrp.AssemblyAngularVelocity = Vector3.zero
+    end)
 end
 
-local function resolveLiveEggPosition(uid, cache)
-	local model = Workspace:FindFirstChild(uid)
-	local clientSlots = Workspace:FindFirstChild("AreaEggSlotsClient")
-	model = mode
+-- ==========================================
+-- [2] ระบบ 2 ภาษา (TH / EN) & สถานะฟังก์ชัน
+-- ==========================================
+local LangData = {
+    TH = {
+        MainTab = "หลักและคอร์ส",
+        EggTab = "ระบบฟาร์ม / Egg",
+        UniversalTab = "ฟังก์ชันทุกแมพ",
+        ConfigTab = "ตั้งค่าและโปรไฟล์",
+        SectionCore = "ระบบคอร์สหลัก (Core Engine)",
+        HumBypass = "Clone Humanoid (กันรีเซ็ตความเร็ว)",
+        FpsFluctuate = "สลับ FPS 60/30 (Bypass)",
+        SpawnDecoy = "สร้างร่างโคลนจำลอง (Decoy)",
+        ClearDecoy = "ลบร่างโคลนจำลอง",
+        TpSafe = "วาร์ปไปจุดปลอดภัย (Safe Zone)",
+        AutoEgg = "ออโต้เก็บไข่/ไอเทมมูลค่าสูงสุด",
+        DropEgg = "วางไอเทมที่ถืออยู่ (Drop)",
+        ScanBest = "สแกนไอเทมแพงสุดในแมพ",
+        WalkSpeedToggle = "เปิดใช้งานวิ่งไว (WalkSpeed)",
+        JumpPowerToggle = "เปิดใช้งานกระโดดสูง (Jump)",
+        NoclipToggle = "เดินทะลุกำแพง (Noclip)",
+        InfJumpToggle = "กระโดดไม่จำกัด (Infinite Jump)",
+        FullBrightToggle = "สว่างทั้งแมพ (Fullbright)",
+        AutoPromptToggle = "กดปุ่ม E อัตโนมัติ (Auto Prompt)",
+    },
+    EN = {
+        MainTab = "Main & Core",
+        EggTab = "Egg / Auto Farm",
+        UniversalTab = "Universal Cheats",
+        ConfigTab = "Config & Settings",
+        SectionCore = "Core Engine Controls",
+        HumBypass = "Humanoid Clone Bypass",
+        FpsFluctuate = "FPS 60/30 Fluctuate",
+        SpawnDecoy = "Spawn Visual Decoy",
+        ClearDecoy = "Clear Visual Decoy",
+        TpSafe = "Teleport to Safe Zone",
+        AutoEgg = "Auto Collect Best Egg",
+        DropEgg = "Drop Carried Egg",
+        ScanBest = "Scan Best Egg Value",
+        WalkSpeedToggle = "Enable WalkSpeed",
+        JumpPowerToggle = "Enable JumpPower",
+        NoclipToggle = "Noclip",
+        InfJumpToggle = "Infinite Jump",
+        FullBrightToggle = "Fullbright",
+        AutoPromptToggle = "Auto ProximityPrompt",
+    }
+}
+
+local currentLang = "TH"
+local Flags = {
+    AutoEgg = false,
+    WalkSpeed = false,
+    JumpPower = false,
+    Noclip = false,
+    InfJump = false,
+    AutoPrompt = false,
+    SpeedVal = 36,
+    JumpVal = 85,
+}
+
+-- ==========================================
+-- [3] สร้างหน้าต่าง WindUI (VORTEX//DELTA-2.5 HUB)
+-- ==========================================
+local Window = WindUI:CreateWindow({
+    Title = "VORTEX//DELTA-2.5 HUB",
+    Icon = "https://cdn.phototourl.com/member/2026-11-19-362b148f-bee1-4c27-8e11-c371a003573e.jpg",
+    Author = "by VORTEX_ENGINE_DELTA-2.5",
+    Theme = "Red",
+})
+
+-- แถบ 1: คอร์สหลัก
+local TabCore = Window:Tab({
+    Title = LangData[currentLang].MainTab,
+    Icon = "cpu",
+})
+
+local SectionCore = TabCore:Section({
+    Title = LangData[currentLang].SectionCore,
+})
+
+local HumBypassToggle = TabCore:Toggle({
+    Title = LangData[currentLang].HumBypass,
+    Flag = "core_hum_bypass",
+    Value = false,
+    Callback = function(state)
+        if state then
+            enableHumBypass()
+        else
+            disableHumBypass()
+        end
+    end
+})
+
+local FpsToggle = TabCore:Toggle({
+    Title = LangData[currentLang].FpsFluctuate,
+    Flag = "core_fps_toggle",
+    Value = false,
+    Callback = function(state)
+        if state then
+            startFpsToggle()
+        else
+            stopFpsToggle()
+        end
+    end
+})
+
+local SpawnDecoyBtn = TabCore:Button({
+    Title = LangData[currentLang].SpawnDecoy,
+    Callback = function()
+        spawnDecoy()
+    end
+})
+
+local ClearDecoyBtn = TabCore:Button({
+    Title = LangData[currentLang].ClearDecoy,
+    Callback = function()
+        clearDecoy()
+    end
+})
+
+local TpSafeBtn = TabCore:Button({
+    Title = LangData[currentLang].TpSafe,
+    Callback = function()
+        tpToPos(getSafeZonePos())
+    end
+})
+
+-- แถบ 2: ระบบ Egg & Auto Farm (จากคอร์สหลัก)
+local TabEgg = Window:Tab({
+    Title = LangData[currentLang].EggTab,
+    Icon = "egg",
+})
+
+local BestEggLabel = TabEgg:Paragraph({
+    Title = "Best Target Info",
+    Desc = "Waiting for scan..."
+})
+
+local AutoEggToggle = TabEgg:Toggle({
+    Title = LangData[currentLang].AutoEgg,
+    Flag = "core_auto_egg",
+    Value = false,
+    Callback = function(state)
+        Flags.AutoEgg = state
+        CarryState.Cancel = not state
+    end
+})
+
+local ScanEggBtn = TabEgg:Button({
+    Title = LangData[currentLang].ScanBest,
+    Callback = function()
+        local snaps = getEggSnapshots()
+        local bestInfo = nil
+        for _, rec in ipairs(snaps) do
+            local info = parseEggInfo(rec)
+            if not bestInfo or info.Value > bestInfo.Value then
+                bestInfo = info
+            end
+        end
+        if bestInfo then
+            BestEggLabel:SetDesc(bestInfo.Name .. " | " .. formatRate(bestInfo.Value))
+        else
+            BestEggLabel:SetDesc("No EggWorld records found in this map.")
+        end
+    end
+})
+
+local DropEggBtn = TabEgg:Button({
+    Title = LangData[currentLang].DropEgg,
+    Callback = function()
+        dro
