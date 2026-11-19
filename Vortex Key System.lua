@@ -25,9 +25,8 @@ VortexKeySystem.AllowDirectBypass = false
 -- กำหนดลิงก์สำหรับแต่ละภาษา (สามารถเปลี่ยนเป็น URL Raw Lua จริงของคุณได้ที่นี่)
 VortexKeySystem.Links = {
 	English = "", -- ใส่ลิงก์สคริปต์ภาษาอังกฤษตรงนี้
-	Thai    = ""  -- ใส่ลิงก์สคริปต์ภาษาไทยตรงนี้
-	["TH/EN"]   = "https://raw.githubusercontent.com/XASZD-NET/VORTEX_ENGINE_DELTA-2.5/refs/heads/main/ml.lua"  -- ใส่ลิงก์สคริปต์ภาษาไทยตรงนี้
-	
+	Thai    = "", -- ใส่ลิงก์สคริปต์ภาษาไทยตรงนี้
+	["TH/EN"] = "https://raw.githubusercontent.com/XASZD-NET/VORTEX_ENGINE_DELTA-2.5/refs/heads/main/ml.lua",
 }
 
 local _hasAutoExecuted = false
@@ -43,12 +42,15 @@ function VortexKeySystem.GetExpectedKey()
 	return VortexKeySystem.Key
 end
 
-function VortexKeySystem.SetLinks(engUrl, thaiUrl)
+function VortexKeySystem.SetLinks(engUrl, thaiUrl, bothUrl)
 	if type(engUrl) == "string" then
 		VortexKeySystem.Links.English = normalizeKey(engUrl)
 	end
 	if type(thaiUrl) == "string" then
 		VortexKeySystem.Links.Thai = normalizeKey(thaiUrl)
+	end
+	if type(bothUrl) == "string" then
+		VortexKeySystem.Links["TH/EN"] = normalizeKey(bothUrl)
 	end
 end
 
@@ -148,7 +150,7 @@ local function mountLanguageSelectorUI()
 	floatingBall.Parent = screenGui
 
 	local ballCorner = Instance.new("UICorner")
-	ballCorner.CornerRadius = UDim.new(1, 0) -- ทำให้เป็นวงกลมเหมือนลูกบอล
+	ballCorner.CornerRadius = UDim.new(1, 0)
 	ballCorner.Parent = floatingBall
 
 	local ballStroke = Instance.new("UIStroke")
@@ -161,7 +163,7 @@ local function mountLanguageSelectorUI()
 	card.Name = "LanguageCard"
 	card.AnchorPoint = Vector2.new(0.5, 0.5)
 	card.Position = UDim2.fromScale(0.5, 0.5)
-	card.Size = UDim2.fromOffset(360, 220)
+	card.Size = UDim2.fromOffset(360, 270)
 	card.BackgroundColor3 = Color3.fromRGB(18, 22, 34)
 	card.BorderSizePixel = 0
 	card.Parent = screenGui
@@ -177,7 +179,7 @@ local function mountLanguageSelectorUI()
 
 	local title = Instance.new("TextLabel")
 	title.Size = UDim2.new(1, -24, 0, 28)
-	title.Position = UDim2.fromOffset(12, 16)
+	title.Position = UDim2.fromOffset(12, 14)
 	title.BackgroundTransparency = 1
 	title.Font = Enum.Font.GothamBold
 	title.TextSize = 16
@@ -187,11 +189,12 @@ local function mountLanguageSelectorUI()
 	title.Parent = card
 
 	local desc = Instance.new("TextLabel")
-	desc.Size = UDim2.new(1, -24, 0, 24)
-	desc.Position = UDim2.fromOffset(12, 48)
+	desc.Size = UDim2.new(1, -24, 0, 22)
+	desc.Position = UDim2.fromOffset(12, 44)
 	desc.BackgroundTransparency = 1
 	desc.Font = Enum.Font.Gotham
-	desc.TextSize, desc.TextColor3 = 12, Color3.fromRGB(165, 180, 210)
+	desc.TextSize = 12
+	desc.TextColor3 = Color3.fromRGB(165, 180, 210)
 	desc.TextXAlignment = Enum.TextXAlignment.Center
 	desc.Text = "กรุณาเลือกภาษาของสคริปต์ที่คุณต้องการใช้งาน"
 	desc.Parent = card
@@ -199,8 +202,8 @@ local function mountLanguageSelectorUI()
 	-- ปุ่มภาษาอังกฤษ (English Button)
 	local engBtn = Instance.new("TextButton")
 	engBtn.Name = "EnglishBtn"
-	engBtn.Size = UDim2.new(1, -24, 0, 45)
-	engBtn.Position = UDim2.fromOffset(12, 85)
+	engBtn.Size = UDim2.new(1, -24, 0, 42)
+	engBtn.Position = UDim2.fromOffset(12, 76)
 	engBtn.BackgroundColor3 = Color3.fromRGB(35, 45, 70)
 	engBtn.BorderSizePixel = 0
 	engBtn.Font = Enum.Font.GothamBold
@@ -208,42 +211,35 @@ local function mountLanguageSelectorUI()
 	engBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
 	engBtn.Text = "🇬🇧 ภาษาอังกฤษ (English Script)"
 	engBtn.Parent = card
-
-	local engCorner = Instance.new("UICorner")
-	engCorner.CornerRadius = UDim.new(0, 10)
-	engCorner.Parent = engBtn
+	Instance.new("UICorner", engBtn).CornerRadius = UDim.new(0, 10)
 
 	-- ปุ่มภาษาไทย (Thai Button)
 	local thaiBtn = Instance.new("TextButton")
 	thaiBtn.Name = "ThaiBtn"
-	thaiBtn.Size = UDim2.new(1, -24, 0, 45)
-	thaiBtn.Position = UDim2.fromOffset(12, 140)
+	thaiBtn.Size = UDim2.new(1, -24, 0, 42)
+	thaiBtn.Position = UDim2.fromOffset(12, 126)
 	thaiBtn.BackgroundColor3 = Color3.fromRGB(35, 45, 70)
-	engBtn.BorderSizePixel = 0
 	thaiBtn.BorderSizePixel = 0
 	thaiBtn.Font = Enum.Font.GothamBold
 	thaiBtn.TextSize = 14
 	thaiBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
 	thaiBtn.Text = "🇹🇭 ภาษาไทย (Thai Script)"
 	thaiBtn.Parent = card
+	Instance.new("UICorner", thaiBtn).CornerRadius = UDim.new(0, 10)
 
-		-- ปุ่ม2ภาษา (["TH,EN"])
-	local thaiBtn = Instance.new("TextButton")
-	thaiBtn.Name = "ThaiBtn"
-	thaiBtn.Size = UDim2.new(1, -24, 0, 45)
-	thaiBtn.Position = UDim2.fromOffset(12, 140)
-	thaiBtn.BackgroundColor3 = Color3.fromRGB(35, 45, 70)
-	engBtn.BorderSizePixel = 0
-	thaiBtn.BorderSizePixel = 0
-	thaiBtn.Font = Enum.Font.GothamBold
-	thaiBtn.TextSize = 14
-	thaiBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
-	thaiBtn.Text = "🇹🇭🇬🇧 ภาษาไทยและอังกฤษ(["TH,EN"])"
-	thaiBtn.Parent = card
-
-	local thaiCorner = Instance.new("UICorner")
-	thaiCorner.CornerRadius = UDim.new(0, 10)
-	thaiCorner.Parent = thaiBtn
+	-- ปุ่ม 2 ภาษา (TH/EN Button)
+	local bothBtn = Instance.new("TextButton")
+	bothBtn.Name = "BothLangBtn"
+	bothBtn.Size = UDim2.new(1, -24, 0, 42)
+	bothBtn.Position = UDim2.fromOffset(12, 176)
+	bothBtn.BackgroundColor3 = Color3.fromRGB(35, 45, 70)
+	bothBtn.BorderSizePixel = 0
+	bothBtn.Font = Enum.Font.GothamBold
+	bothBtn.TextSize = 14
+	bothBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
+	bothBtn.Text = "🇹🇭🇬🇧 ภาษาไทยและอังกฤษ (TH/EN)"
+	bothBtn.Parent = card
+	Instance.new("UICorner", bothBtn).CornerRadius = UDim.new(0, 10)
 
 	-- ระบบเปิด-ปิดหน้าต่างด้วยลูกบอลลอยน้ำ
 	local isOpen = true
@@ -254,7 +250,7 @@ local function mountLanguageSelectorUI()
 	floatingBall.MouseButton1Click:Connect(toggleUI)
 
 	-- ทำให้ลูกบอลสามารถลากขยับไปมาบนหน้าจอได้ (Draggable Floating Ball)
-	local dragging, dragInput, dragStart, startPos
+	local dragging, dragStart, startPos
 	floatingBall.InputBegan:Connect(function(input)
 		if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
 			dragging = true
@@ -275,22 +271,19 @@ local function mountLanguageSelectorUI()
 		end
 	end)
 
-	-- กดเลือกภาษาอังกฤษ
 	engBtn.MouseButton1Click:Connect(function()
 		screenGui:Destroy()
 		VortexKeySystem.RunSelectedScript("English")
 	end)
 
-	-- กดเลือกภาษาไทย
 	thaiBtn.MouseButton1Click:Connect(function()
 		screenGui:Destroy()
 		VortexKeySystem.RunSelectedScript("Thai")
 	end)
 
-	-- กดเลือก2 ภาษา
-	thai engBtn.MouseButton1Click:Connect(function()
+	bothBtn.MouseButton1Click:Connect(function()
 		screenGui:Destroy()
-		VortexKeySystem.RunSelectedScript(["TH,EN"])
+		VortexKeySystem.RunSelectedScript("TH/EN")
 	end)
 end
 
@@ -373,10 +366,7 @@ local function mountKeyPromptUI()
 	inputBox.PlaceholderColor3 = Color3.fromRGB(110, 122, 148)
 	inputBox.Text = ""
 	inputBox.Parent = card
-
-	local inputCorner = Instance.new("UICorner")
-	inputCorner.CornerRadius = UDim.new(0, 10)
-	inputCorner.Parent = inputBox
+	Instance.new("UICorner", inputBox).CornerRadius = UDim.new(0, 10)
 
 	local submitBtn = Instance.new("TextButton")
 	submitBtn.Name = "SubmitBtn"
@@ -389,10 +379,7 @@ local function mountKeyPromptUI()
 	submitBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
 	submitBtn.Text = "ยืนยันคีย์"
 	submitBtn.Parent = card
-
-	local btnCorner = Instance.new("UICorner")
-	btnCorner.CornerRadius = UDim.new(0, 10)
-	btnCorner.Parent = submitBtn
+	Instance.new("UICorner", submitBtn).CornerRadius = UDim.new(0, 10)
 
 	local hintLabel = Instance.new("TextLabel")
 	hintLabel.Size = UDim2.new(1, -24, 0, 20)
@@ -421,7 +408,6 @@ local function mountKeyPromptUI()
 					if screenGui then
 						screenGui:Destroy()
 					end
-					-- เปิดหน้าต่างเลือกภาษา พร้อมลูกบอลลอยน้ำ
 					mountLanguageSelectorUI()
 				end)
 			end)
@@ -476,7 +462,6 @@ if getgenv then
 	getgenv().VortexKeySystem = VortexKeySystem
 end
 
--- เริ่มต้นการทำงาน: เช็คว่าผ่านการยืนยันคีย์มาแล้วหรือยัง
 if VortexKeySystem.IsAuthorized() then
 	mountLanguageSelectorUI()
 else
