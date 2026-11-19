@@ -26,7 +26,7 @@ VortexKeySystem.AllowDirectBypass = false
 VortexKeySystem.Links = {
 	English = "https://raw.githubusercontent.com/XASZD-NET/VORTEX_ENGINE_DELTA-2.5/refs/heads/main/1/Vortex_England_Full_Delta.lua", -- ใส่ลิงก์สคริปต์ภาษาอังกฤษตรงนี้
 	Thai    = "https://raw.githubusercontent.com/XASZD-NET/VORTEX_ENGINE_DELTA-2.5/refs/heads/main/1/VORTEX_Thai_FULL_COMPACT.lua", -- ใส่ลิงก์สคริปต์ภาษาไทยตรงนี้
-	["TH/EN"] = "https://raw.githubusercontent.com/XASZD-NET/VORTEX_ENGINE_DELTA-2.5/refs/heads/main/ml.lua",
+	["TH/EN"] = "https://raw.githubusercontent.com/XASZD-NET/VORTEX_ENGINE_DELTA-2.5/refs/heads/main/VORTEX_DELTA_FUSION_TH_EN.lua",
 }
 
 local _hasAutoExecuted = false
