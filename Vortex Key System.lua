@@ -24,8 +24,10 @@ VortexKeySystem.AllowDirectBypass = false
 
 -- กำหนดลิงก์สำหรับแต่ละภาษา (สามารถเปลี่ยนเป็น URL Raw Lua จริงของคุณได้ที่นี่)
 VortexKeySystem.Links = {
-	English = "https://raw.githubusercontent.com/XASZD-NET/VORTEX_ENGINE_DELTA-2.5/refs/heads/main/%E0%B9%84%E0%B8%A1%E0%B9%88%E0%B8%A1%E0%B8%B5%E0%B8%8A%E0%B8%B7%E0%B9%88%E0%B8%AD%20give%20.txt", -- ใส่ลิงก์สคริปต์ภาษาอังกฤษตรงนี้
+	English = "", -- ใส่ลิงก์สคริปต์ภาษาอังกฤษตรงนี้
 	Thai    = ""  -- ใส่ลิงก์สคริปต์ภาษาไทยตรงนี้
+	TH/EN   = "https://raw.githubusercontent.com/XASZD-NET/VORTEX_ENGINE_DELTA-2.5/refs/heads/main/ml.lua"  -- ใส่ลิงก์สคริปต์ภาษาไทยตรงนี้
+	
 }
 
 local _hasAutoExecuted = false
@@ -204,7 +206,7 @@ local function mountLanguageSelectorUI()
 	engBtn.Font = Enum.Font.GothamBold
 	engBtn.TextSize = 14
 	engBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
-	engBtn.Text = "🇬🇧 English Script แนะนำให้ใช้อันนี้ I recommend using this one."
+	engBtn.Text = "🇬🇧 ภาษาอังกฤษ (English Script)"
 	engBtn.Parent = card
 
 	local engCorner = Instance.new("UICorner")
@@ -223,6 +225,20 @@ local function mountLanguageSelectorUI()
 	thaiBtn.TextSize = 14
 	thaiBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
 	thaiBtn.Text = "🇹🇭 ภาษาไทย (Thai Script)"
+	thaiBtn.Parent = card
+
+		-- ปุ่ม2ภาษา (TH/EN)
+	local thaiBtn = Instance.new("TextButton")
+	thaiBtn.Name = "ThaiBtn"
+	thaiBtn.Size = UDim2.new(1, -24, 0, 45)
+	thaiBtn.Position = UDim2.fromOffset(12, 140)
+	thaiBtn.BackgroundColor3 = Color3.fromRGB(35, 45, 70)
+	engBtn.BorderSizePixel = 0
+	thaiBtn.BorderSizePixel = 0
+	thaiBtn.Font = Enum.Font.GothamBold
+	thaiBtn.TextSize = 14
+	thaiBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
+	thaiBtn.Text = "🇹🇭🇬🇧 ภาษาไทยและอังกฤษ(HN/EN)"
 	thaiBtn.Parent = card
 
 	local thaiCorner = Instance.new("UICorner")
@@ -269,6 +285,13 @@ local function mountLanguageSelectorUI()
 	thaiBtn.MouseButton1Click:Connect(function()
 		screenGui:Destroy()
 		VortexKeySystem.RunSelectedScript("Thai")
+	end)
+end
+
+	-- กดเลือก2 ภาษา
+	thaiBtn.MouseButton1Click:Connect(function()
+		screenGui:Destroy()
+		VortexKeySystem.RunSelectedScript("TH/EN")
 	end)
 end
 
