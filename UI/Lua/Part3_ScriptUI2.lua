@@ -4,8 +4,8 @@
 -- ============================================================================
 
 -- [1. ส่วนหัว: ตรวจสอบและโหลดลิงก์ Part 1 และ Part 2 เข้ามาอัตโนมัติ]
-local Part1_Link = "https://raw.githubusercontent.com/XASZD-NET/VORTEX_ENGINE_DELTA-2.5/refs/heads/main/UI/Lua/Part1_UICore.lua"
-local Part2_Link = "https://raw.githubusercontent.com/XASZD-NET/VORTEX_ENGINE_DELTA-2.5/refs/heads/main/UI/Lua/Part2_ScriptUI1.lua"
+local Part1_Link = "https://raw.githubusercontent.com/XASZD-NET/VORTEX_ENGINE_DELTA-2.5/refs/heads/main/UI/Lua/Part2_ScriptUI1.lua"
+local Part2_Link = "https://raw.githubusercontent.com/XASZD-NET/VORTEX_ENGINE_DELTA-2.5/refs/heads/main/UI/Lua/Part4_MessageAndFunctionTab.lua"
 
 if not _G.CustomUICore then
     loadstring(game:HttpGet(Part1_Link))()
