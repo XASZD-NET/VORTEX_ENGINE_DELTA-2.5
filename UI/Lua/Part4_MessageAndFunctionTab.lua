@@ -9,7 +9,7 @@ local LocalPlayer = Players.LocalPlayer
 local Part3_Link = "https://raw.githubusercontent.com/XASZD-NET/VORTEX_ENGINE_DELTA-2.5/refs/heads/main/UI/Lua/Part3_ScriptUI2.lua"
 
 -- [ใส่ลิงก์พอร์ตที่ 5 ตรงนี้ได้เลย]
-local Part5_Link = "" -- ตัวอย่าง: "https://raw.githubusercontent.com/.../Part5_PingPongRelay.lua"
+local Part5_Link = "https://raw.githubusercontent.com/XASZD-NET/VORTEX_ENGINE_DELTA-2.5/refs/heads/main/UI/Lua/Part5_PingPongRelay.lua" -- ตัวอย่าง: "https://raw.githubusercontent.com/.../Part5_PingPongRelay.lua"
 
 -- โหลดพอร์ตที่ 3 อัตโนมัติหากยังไม่มีในระบบ
 if not _G.ScriptUI2 then
