@@ -16,7 +16,7 @@ ui.Config = {
     ByAuthor = "by ชื่อผู้จัดทำ",
     BySubLink = "https://link-under-by.example", --ใส่ลิงค์ดิสคอร์ดของคุณ--
     LinkToUI2 = "https://raw.githubusercontent.com/XASZD-NET/VORTEX_ENGINE_DELTA-2.5/refs/heads/main/UI/Lua/Part1_UICore.lua",
-    LinkFromUI2 = "https://endpoint-ui1.example/relay",
+    LinkFromUI2 = "",
     Interval = 2,
     Running = false
 }
